@@ -1,9 +1,11 @@
+# clear all
+rm(list = ls())
 
-# Set working directory
-setwd('/Users/shweta/Documents/Academics/Math For ML/Project/child_vars_2')
+library(stringr)
+library(dplyr)
+library(tidyr)
 
-
-new_data <- read.table('child_y_vars.dat', sep=' ')
+new_data <- read.table('./data/child_y_vars.dat', sep=' ')
 names(new_data) <- c('C0000100',
 'C0000200',
 'C0005300',
@@ -3129,7 +3131,7 @@ question_names_children_2 <- c("CPUBID_XRND",
                                "Q16-8C_2018",
                                "Q16-8D_2018",
                                "Q16-8E_2018",
-                               "Q16-8F_2018"))
+                               "Q16-8F_2018")
 
 qnames = function(data) {
 names(data) <- c("CPUBID_XRND",
@@ -3465,9 +3467,163 @@ return(data)
 
 #********************************************************************************************************
 
-dict_children_2 <- data.frame(names = question_names_children_2, labels = varlabels_chidlren_new)
+dict_children_2 <- data.frame(names = question_names_children_2, labels = varlabels_children_new) %>% 
+                    mutate(year = str_sub(labels,-4,-1),
+                           year = as.numeric(ifelse(str_sub(year, 1, 2) %in% c("19", "20"), year, NA)))
 colnames(new_data) <- varlabels_children_new
 
 
 #************************************************************************************************************
+children_data_labelled_2 <- new_data
 
+# create Y variable
+children_data_labelled_2 <- children_data_labelled_2 %>% 
+  mutate(Y = `DATE OF BIRTH OF CHILD - YEAR`+15)
+
+# pivot
+children_data_pivot_2 <- children_data_labelled_2 %>% 
+  pivot_longer(cols = "SPPC: GLOBAL SELF-WORTH RAW SCORE 1986":"AGREE W/ STMT - OK FOR GIRL TO ASK BOY FOR DATE 2018",
+               names_to = 'variable') %>% 
+  mutate(question = str_sub(variable,1,-5),
+         year = as.integer(str_sub(variable,-4,-1)),
+         gap = year - `DATE OF BIRTH OF CHILD - YEAR`) %>% 
+  mutate(value_test = case_when(gap < 1 ~ "Not Applicable",
+                                gap >=1 ~ "Applicable"))
+
+
+
+# check how many children each mother has
+mother_ids_2 <- children_data_labelled_2 %>% 
+  select(`ID CODE OF MOTHER OF CHILD`) %>% 
+  group_by(`ID CODE OF MOTHER OF CHILD`) %>% 
+  summarise(children = n())
+
+
+# SANITY CHECK: see how many NA responses are found
+na_children_2 <- children_data_pivot_2 %>% 
+  filter(value_test == 'Applicable',
+         is.na(value)) %>% 
+  mutate(count = 1) %>% 
+  select(`ID CODE OF CHILD`, 'question','year', 'count')
+
+
+
+#########################################
+# working with the pivot longer data
+#########################################
+
+# (1) CONSOLIDATE Y DATA
+
+gender_questions = c("BOYS/GIRLS SHOULD BE TREATED ALIKE ", 
+                     "AGREE W/ STM - GRLS & BOYS SHD BE TRTD SAME AT SCL ",
+                     "A GIRL SHOULD NOT SAY SHE IS SMARTER ", 
+                     "AGREE W/ - GIRL SHD NT LET BOY KNOW SHE IS SMARTER ",
+                     "COMPETING MAKES GIRLS UNPOPULAR ",
+                     "AGREE W/ - COMPT W/ BOYS IN SCL MAKE A GIRL UNPOP " ,
+                     "GIRLS SHOULD PAY OWN WAY ON DATES ",
+                     "AGREE W/ STMT - GIRL SHD PAY HER OWN WAY ON DATES ", 
+                     "MORE IMPT FOR BOYS TO GO TO COLLEGE ",
+                     "AGREE W/ - IF NOT EN $ ALL KIDS COLL, BOYS SHD GO ",
+                     "AGREE W/ STMT - OK FOR GIRL TO ASK BOY FOR DATE " )
+for(i in seq(1: length(gender_questions))){
+  print(paste0("----", gender_questions[i], "----"))
+  tmp <- children_data_pivot_2 %>% 
+              filter(question == gender_questions[i],
+                     is.na(value) == FALSE) %>%
+              group_by(question, `ID CODE OF CHILD`) %>%
+              mutate(max_gap = max(gap)) %>%
+              ungroup() %>% 
+              filter(max_gap >= 12, gap == max_gap)
+  
+  
+  tmp <- tmp %>%
+            pivot_wider(names_from = question, values_from = value) %>%
+            select(c("ID CODE OF CHILD", "ID CODE OF MOTHER OF CHILD" , gender_questions[i], "year", "gap"))
+  f = paste0("y_data_", as.character(i))
+  g = trimws(gsub('[[:punct:] ]+',' ',gender_questions[i]))
+  write.csv(tmp, paste0("./data/", "y_data_", g, ".csv"), row.names = FALSE)
+  names(tmp)[3:5] = paste0(as.character(i),"_", names(tmp)[3:5])
+  assign(f, tmp)
+}
+
+
+# join
+y_data = y_data_1
+y_data = full_join(y_data, y_data_2 , by = names(y_data_1)[1:2])
+y_data = full_join(y_data, y_data_3 , by = names(y_data_1)[1:2])
+y_data = full_join(y_data, y_data_4 , by = names(y_data_1)[1:2])
+y_data = full_join(y_data, y_data_5 , by = names(y_data_1)[1:2])
+y_data = full_join(y_data, y_data_6 , by = names(y_data_1)[1:2])
+y_data = full_join(y_data, y_data_7 , by = names(y_data_1)[1:2])
+y_data = full_join(y_data, y_data_8 , by = names(y_data_1)[1:2])
+y_data = full_join(y_data, y_data_9 , by = names(y_data_1)[1:2])
+y_data = full_join(y_data, y_data_10, by = names(y_data_1)[1:2])
+y_data = full_join(y_data, y_data_11, by = names(y_data_1)[1:2])
+write.csv(tmp, paste0("./data/", "y_data_all.csv"), row.names = FALSE)
+
+# (2) CONSOLIDATE X DATA ON SELF-WORTH
+
+self_worth_questions = unique(children_data_pivot_2$variable)[str_sub(unique(children_data_pivot_2$variable), 1, 4) == "SPPC"]
+children_self_worth <- children_data_pivot_2 %>%
+                          filter(variable %in% self_worth_questions) %>%
+                          rename(self_worth=value) %>%
+                          select(c("ID CODE OF CHILD", "ID CODE OF MOTHER OF CHILD", "year", "gap", "self_worth"))
+
+
+y <- read.csv('./data/y_data_BOYS GIRLS SHOULD BE TREATED ALIKE.csv')
+all_data <- left_join(y, children_self_worth, by=c("year"="year", 
+                                                   "gap"="gap", 
+                                                   "ID.CODE.OF.CHILD"="ID CODE OF CHILD", 
+                                                   "ID.CODE.OF.MOTHER.OF.CHILD"="ID CODE OF MOTHER OF CHILD")) %>%
+                      rename(gap_at_y = gap,
+                             year_at_y = year)
+
+
+# (3) JOIN DEMOGRAPHIC DATA
+demographics <- children_data_pivot_2 %>%
+                            select(c("ID CODE OF CHILD", "ID CODE OF MOTHER OF CHILD", 
+                                     "RACE OF CHILD (FROM MOTHERS SCREENER 1979)",
+                                     "SEX OF CHILD",
+                                     "DATE OF BIRTH OF CHILD - YEAR")) %>%
+                            rename("race_child" = "RACE OF CHILD (FROM MOTHERS SCREENER 1979)",
+                                   "sex_child" = "SEX OF CHILD",
+                                   "yob_child" = "DATE OF BIRTH OF CHILD - YEAR") %>%
+                            distinct(`ID CODE OF CHILD`, `ID CODE OF MOTHER OF CHILD`, .keep_all = TRUE)
+
+
+all_data <- left_join(all_data, demographics, by=c("ID.CODE.OF.CHILD"="ID CODE OF CHILD", 
+                                                   "ID.CODE.OF.MOTHER.OF.CHILD"="ID CODE OF MOTHER OF CHILD"))
+
+save(all_data, file = "./data/intermediate1.RData")
+
+
+
+
+
+
+
+# 
+# #### SANITY CHECKING ####
+# children_id_qs <- children_data_pivot_2 %>%
+#   filter(gender_q==TRUE) %>%
+#   group_by(question, `ID CODE OF CHILD`) %>%
+#   summarize(count=n())
+# 
+# children_gender_qs <- children_data_pivot_2 %>% 
+#   filter(gender_q == TRUE,
+#          is.na(value) == FALSE) %>%
+#   group_by(question, `ID CODE OF CHILD`) %>%
+#   summarize(max_gap = max(gap)) %>%
+#   ungroup() %>% filter(max_gap >= 12)
+# 
+# 
+# # check for missingness
+# join <- left_join(children_id_qs, children_gender_qs, by=c("ID CODE OF CHILD", "question"))
+# join <- join %>% mutate(max_gap = ifelse(is.na(max_gap)==TRUE, -1, max_gap)) %>%
+#   group_by(`ID CODE OF CHILD`) %>% 
+#   summarize(max_gap = max(max_gap)) %>%
+#   ungroup() %>%
+#   group_by(max_gap) %>%
+#   summarize(n=n()) %>%
+#   mutate(pct = 100*n/sum(n))
+# 

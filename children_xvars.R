@@ -1,148 +1,151 @@
+# clear all
+rm(list = ls())
 
 library(stringr)
 library(dplyr)
+library(tidyr)
 
-# Set working directory
-setwd('/Users/shweta/Documents/Academics/Math For ML/Project/children_new_R')
+# import data
+new_data_children <- read.table('./data/children_new_R.dat', sep=' ')
 
-new_data_children <- read.table('children_new_R.dat', sep=' ')
+# assign appropriate variable names
 names(new_data_children) <- c('C0000100',
-'C0000200',
-'C0005300',
-'C0005400',
-'C0005700',
-'C0008100',
-'C0008600',
-'C0009100',
-'C0009600',
-'C0009700',
-'C0010110',
-'C0010200',
-'C0010700',
-'C0011110',
-'C0011112',
-'C0011117',
-'C0011122',
-'C0011127',
-'C0011132',
-'C0011137',
-'C0011142',
-'C0053502',
-'C0054101',
-'C0055101',
-'C0057501',
-'C0058101',
-'C0058701',
-'C0059301',
-'C0059901',
-'C0061133',
-'C0061134',
-'C0061135',
-'C0061136',
-'C0061137',
-'C0061138',
-'C0061139',
-'C0061140',
-'C0061141',
-'C0061142',
-'C0061143',
-'C0061144',
-'C0061145',
-'C0061146',
-'C0730000',
-'C0941300',
-'C1134800',
-'C1363300',
-'C1585400',
-'C1923700',
-'C2461900',
-'C2763200',
-'C3042100',
-'C3364600',
-'C3601700',
-'C3602401',
-'C3868300',
-'C3981700',
-'C3982401',
-'C5116500',
-'C5525500',
-'C5526300',
-'C5693800',
-'C5801800',
-'C5802600',
-'C5965700',
-'C6051100',
-'C6051504',
-'Y0009800',
-'Y0396800',
-'Y0686600',
-'Y0992300',
-'Y0992301',
-'Y0992302',
-'Y0992303',
-'Y0992304',
-'Y0992305',
-'Y1232900',
-'Y1232901',
-'Y1232902',
-'Y1232903',
-'Y1232904',
-'Y1232905',
-'Y1462700',
-'Y1462701',
-'Y1462702',
-'Y1462703',
-'Y1462704',
-'Y1462705',
-'Y1709900',
-'Y1709901',
-'Y1709902',
-'Y1709903',
-'Y1709904',
-'Y1709905',
-'Y1995500',
-'Y1995501',
-'Y1995502',
-'Y1995503',
-'Y1995504',
-'Y1995505',
-'Y1995506',
-'Y2267000',
-'Y2314300',
-'Y2314301',
-'Y2314302',
-'Y2314303',
-'Y2314304',
-'Y2314305',
-'Y2314306',
-'Y2647000',
-'Y2647001',
-'Y2647002',
-'Y2647003',
-'Y2647004',
-'Y2647005',
-'Y2647006',
-'Y3004200',
-'Y3004201',
-'Y3004202',
-'Y3004203',
-'Y3004204',
-'Y3004205',
-'Y3004206',
-'Y3373000',
-'Y3373001',
-'Y3373002',
-'Y3373003',
-'Y3373004',
-'Y3373005',
-'Y3373006',
-'Y4014100',
-'Y4014101',
-'Y4014102',
-'Y4014103',
-'Y4014104',
-'Y4014105',
-'Y4014106')
+                              'C0000200',
+                              'C0005300',
+                              'C0005400',
+                              'C0005700',
+                              'C0008100',
+                              'C0008600',
+                              'C0009100',
+                              'C0009600',
+                              'C0009700',
+                              'C0010110',
+                              'C0010200',
+                              'C0010700',
+                              'C0011110',
+                              'C0011112',
+                              'C0011117',
+                              'C0011122',
+                              'C0011127',
+                              'C0011132',
+                              'C0011137',
+                              'C0011142',
+                              'C0053502',
+                              'C0054101',
+                              'C0055101',
+                              'C0057501',
+                              'C0058101',
+                              'C0058701',
+                              'C0059301',
+                              'C0059901',
+                              'C0061133',
+                              'C0061134',
+                              'C0061135',
+                              'C0061136',
+                              'C0061137',
+                              'C0061138',
+                              'C0061139',
+                              'C0061140',
+                              'C0061141',
+                              'C0061142',
+                              'C0061143',
+                              'C0061144',
+                              'C0061145',
+                              'C0061146',
+                              'C0730000',
+                              'C0941300',
+                              'C1134800',
+                              'C1363300',
+                              'C1585400',
+                              'C1923700',
+                              'C2461900',
+                              'C2763200',
+                              'C3042100',
+                              'C3364600',
+                              'C3601700',
+                              'C3602401',
+                              'C3868300',
+                              'C3981700',
+                              'C3982401',
+                              'C5116500',
+                              'C5525500',
+                              'C5526300',
+                              'C5693800',
+                              'C5801800',
+                              'C5802600',
+                              'C5965700',
+                              'C6051100',
+                              'C6051504',
+                              'Y0009800',
+                              'Y0396800',
+                              'Y0686600',
+                              'Y0992300',
+                              'Y0992301',
+                              'Y0992302',
+                              'Y0992303',
+                              'Y0992304',
+                              'Y0992305',
+                              'Y1232900',
+                              'Y1232901',
+                              'Y1232902',
+                              'Y1232903',
+                              'Y1232904',
+                              'Y1232905',
+                              'Y1462700',
+                              'Y1462701',
+                              'Y1462702',
+                              'Y1462703',
+                              'Y1462704',
+                              'Y1462705',
+                              'Y1709900',
+                              'Y1709901',
+                              'Y1709902',
+                              'Y1709903',
+                              'Y1709904',
+                              'Y1709905',
+                              'Y1995500',
+                              'Y1995501',
+                              'Y1995502',
+                              'Y1995503',
+                              'Y1995504',
+                              'Y1995505',
+                              'Y1995506',
+                              'Y2267000',
+                              'Y2314300',
+                              'Y2314301',
+                              'Y2314302',
+                              'Y2314303',
+                              'Y2314304',
+                              'Y2314305',
+                              'Y2314306',
+                              'Y2647000',
+                              'Y2647001',
+                              'Y2647002',
+                              'Y2647003',
+                              'Y2647004',
+                              'Y2647005',
+                              'Y2647006',
+                              'Y3004200',
+                              'Y3004201',
+                              'Y3004202',
+                              'Y3004203',
+                              'Y3004204',
+                              'Y3004205',
+                              'Y3004206',
+                              'Y3373000',
+                              'Y3373001',
+                              'Y3373002',
+                              'Y3373003',
+                              'Y3373004',
+                              'Y3373005',
+                              'Y3373006',
+                              'Y4014100',
+                              'Y4014101',
+                              'Y4014102',
+                              'Y4014103',
+                              'Y4014104',
+                              'Y4014105',
+                              'Y4014106')
 
 
 # Handle missing values
@@ -1843,6 +1846,9 @@ question_names_children <- c("CPUBID_XRND",
                                    "Q2-38A~000006_2018",
                                    "Q2-38A~000007_2018")
 
+
+
+# mapping Qnames, actual questions, and survey year
 dict_children <- data.frame(names = question_names_children, labels = varlabels_children) %>%
   mutate(year = str_sub(labels,-4,-1))
          
@@ -1860,15 +1866,20 @@ children_data_pivot <- children_data_labelled %>%
   mutate(question = str_sub(variable,1,-5),
          year = as.integer(str_sub(variable,-4,-1)),
          gap = year - `DATE OF BIRTH OF CHILD - YEAR`) %>% 
-  mutate(value_test = case_when(gap < 3 ~ "Not Applicable",
-                                gap >=3 ~ "Applicable"))
+  mutate(value_test = case_when(gap < 1 ~ "Not Applicable",
+                                gap >=1 ~ "Applicable"))
 
+
+# check how many children each mother has
 mother_ids <- children_data_labelled %>% 
   select(MOTHER_ID) %>% 
   group_by(MOTHER_ID) %>% 
   summarise(children = n())
 
+save(mother_ids, file = "./data/mother_ids.RData")
 
+
+# SANITY CHECK: see how many NA responses are found
 na_children <- children_data_pivot %>% 
   filter(value_test == 'Applicable',
          is.na(value)) %>% 
@@ -1876,4 +1887,54 @@ na_children <- children_data_pivot %>%
   select('CHILD_ID', 'question','year', 'count')
 
 
+#########################################
+# working with the pivot longer data
+#########################################
 
+load('./data/intermediate1.RData')
+
+# (a) does father live with family?
+children_father_present = children_data_pivot %>%
+                              filter(question == "FATHER LIVE IN HH OF MOTHER? ",
+                                     gap > 0) %>%
+                              left_join(all_data[c("ID.CODE.OF.CHILD", "ID.CODE.OF.MOTHER.OF.CHILD", "year_at_y", "gap_at_y")], 
+                                          by=c("CHILD_ID"="ID.CODE.OF.CHILD",
+                                               "MOTHER_ID"="ID.CODE.OF.MOTHER.OF.CHILD")) %>% 
+                              filter(gap <= gap_at_y,
+                                     year <= year_at_y) %>%
+                              group_by(CHILD_ID, MOTHER_ID) %>%
+                              summarize(father_present = mean(value, na.rm=TRUE))
+
+
+all_data <- left_join(all_data,
+                      children_father_present,
+                      by = c("ID.CODE.OF.CHILD" = "CHILD_ID",
+                             "ID.CODE.OF.MOTHER.OF.CHILD" = "MOTHER_ID"))
+
+
+rm(children_father_present)
+
+# (b) highest level of education expected at time of Y or most recently available
+children_expected_ed = children_data_pivot %>%
+                          filter(question ==  "HOW FAR CHILD EXPECTS TO GO IN SCHL ",
+                                 gap > 0) %>%
+                          left_join(all_data[c("ID.CODE.OF.CHILD", "ID.CODE.OF.MOTHER.OF.CHILD", "year_at_y", "gap_at_y")], 
+                                    by=c("CHILD_ID"="ID.CODE.OF.CHILD",
+                                         "MOTHER_ID"="ID.CODE.OF.MOTHER.OF.CHILD")) %>%
+                          filter(gap <= gap_at_y,
+                                 year <= year_at_y,
+                                 !is.na(value)) %>% 
+                          group_by(CHILD_ID, MOTHER_ID) %>%
+                          mutate(max_gap = max(gap)) %>%
+                          filter(gap == max_gap) %>%
+                          select(c("CHILD_ID","MOTHER_ID","value")) %>%
+                          rename("highest_expected_grade" = "value")
+
+
+all_data <- left_join(all_data,
+                      children_expected_ed,
+                      by = c("ID.CODE.OF.CHILD" = "CHILD_ID",
+                             "ID.CODE.OF.MOTHER.OF.CHILD" = "MOTHER_ID"))
+
+
+save(all_data, file = "./data/intermediate2.RData")
