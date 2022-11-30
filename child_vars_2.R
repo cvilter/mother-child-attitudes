@@ -3514,6 +3514,18 @@ na_children_2 <- children_data_pivot_2 %>%
 # working with the pivot longer data
 #########################################
 
+# (0) encoding
+children_data_pivot_2$`RACE OF CHILD (FROM MOTHERS SCREENER 1979)` <- factor(children_data_pivot_2$`RACE OF CHILD (FROM MOTHERS SCREENER 1979)`,
+                        levels=c(1.0,2.0,3.0),
+                        labels=c("HISPANIC",
+                                 "BLACK",
+                                 "NON-BLACK, NON-HISPANIC"))
+
+children_data_pivot_2$`SEX OF CHILD` <- factor(children_data_pivot_2$`SEX OF CHILD`,
+                        levels=c(1.0,2.0),
+                        labels=c("MALE",
+                                 "FEMALE"))
+
 # (1) CONSOLIDATE Y DATA
 
 gender_questions = c("BOYS/GIRLS SHOULD BE TREATED ALIKE ", 
@@ -3593,39 +3605,9 @@ demographics <- children_data_pivot_2 %>%
                             distinct(`ID CODE OF CHILD`, `ID CODE OF MOTHER OF CHILD`, .keep_all = TRUE)
 
 
+
+
 all_data <- left_join(all_data, demographics, by=c("ID.CODE.OF.CHILD"="ID CODE OF CHILD", 
                                                    "ID.CODE.OF.MOTHER.OF.CHILD"="ID CODE OF MOTHER OF CHILD"))
 
 save(all_data, file = "./data/intermediate1.RData")
-
-
-
-
-
-
-
-# 
-# #### SANITY CHECKING ####
-# children_id_qs <- children_data_pivot_2 %>%
-#   filter(gender_q==TRUE) %>%
-#   group_by(question, `ID CODE OF CHILD`) %>%
-#   summarize(count=n())
-# 
-# children_gender_qs <- children_data_pivot_2 %>% 
-#   filter(gender_q == TRUE,
-#          is.na(value) == FALSE) %>%
-#   group_by(question, `ID CODE OF CHILD`) %>%
-#   summarize(max_gap = max(gap)) %>%
-#   ungroup() %>% filter(max_gap >= 12)
-# 
-# 
-# # check for missingness
-# join <- left_join(children_id_qs, children_gender_qs, by=c("ID CODE OF CHILD", "question"))
-# join <- join %>% mutate(max_gap = ifelse(is.na(max_gap)==TRUE, -1, max_gap)) %>%
-#   group_by(`ID CODE OF CHILD`) %>% 
-#   summarize(max_gap = max(max_gap)) %>%
-#   ungroup() %>%
-#   group_by(max_gap) %>%
-#   summarize(n=n()) %>%
-#   mutate(pct = 100*n/sum(n))
-# 

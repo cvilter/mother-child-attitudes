@@ -8,6 +8,7 @@ library(tidyr)
 
 load("./data/intermediate2.RData")
 load("./data/mothers_data_pivot.RData")
+load("./data/mothers_data_pivot_rel.RData")
 
 
 all_data <- all_data %>% rename("child_id" =  "ID.CODE.OF.CHILD" ,
@@ -16,8 +17,9 @@ all_data <- all_data %>% rename("child_id" =  "ID.CODE.OF.CHILD" ,
 time_of_y <- all_data %>% select(c('mother_id', 'child_id', 'gap_at_y', 'year_at_y', 'yob_child'))
 
 # (a) religion raised (constant)
-religion_raised <- mothers_data_pivot %>%
-  filter(question %in% c("IN WHAT RELIGION WAS R RAISED? ", "IN WHAT RELIGION WAS R RAISED? Collapsed "),
+# update: removed the collapsed variable
+religion_raised <- mothers_data_pivot_rel %>%
+  filter(question %in% c("IN WHAT RELIGION WAS R RAISED? "),
          !is.na(value)) %>%
   mutate(flag = ifelse(question == "IN WHAT RELIGION WAS R RAISED? ", 1, 0)) %>% 
   group_by(MOTHER_ID) %>%
@@ -37,7 +39,7 @@ rm(religion_raised)
 # (b) current religion (at time of Y)
 
 
-religion_curr <- mothers_data_pivot %>%
+religion_curr <- mothers_data_pivot_rel %>%
   filter(question %in% c("PRESENT RELIGIOUS AFFILIATION "),
          !is.na(value)) %>%
   left_join(time_of_y, by=c("MOTHER_ID"="mother_id")) %>%
@@ -291,4 +293,7 @@ all_data <- na.omit(all_data)
 # Keep only all_data in environment
 rm(list=setdiff(ls(), c("all_data", "all_data_standardized")))
 
+
 write.csv(all_data, file="./data/all_data.csv", row.names=FALSE)
+
+

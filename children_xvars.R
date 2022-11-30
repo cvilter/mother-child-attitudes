@@ -1931,6 +1931,15 @@ children_expected_ed = children_data_pivot %>%
                           rename("highest_expected_grade" = "value")
 
 
+children_expected_ed$highest_expected_grade <- factor(children_expected_ed$highest_expected_grade,
+                        levels=c(1.0,2.0,3.0,4.0,5.0,6.0),
+                        labels=c("LEAVE HIGH SCHOOL BEFORE GRADUATION",
+                                 "GRADUATE FROM HIGH SCHOOL",
+                                 "GET SOME COLLEGE OR OTHER TRAINING",
+                                 "GRADUATE FROM COLLEGE",
+                                 "GET MORE THAN 4 YEARS OF COLLEGE",
+                                 "SOMETHING ELSE"))
+
 all_data <- left_join(all_data,
                       children_expected_ed,
                       by = c("ID.CODE.OF.CHILD" = "CHILD_ID",

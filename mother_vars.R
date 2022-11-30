@@ -12,7 +12,7 @@ library(tidyr)
 
 #load data from file and assign headings
 new_data_mothers <- read.table('./data/mother_vars.dat', sep=' ')
-names(new_data_mothers) <- c('R0000100',
+qcodes <- c('R0000100',
 'R0010300',
 'R0010310',
 'R0010410',
@@ -232,6 +232,8 @@ names(new_data_mothers) <- c('R0000100',
 'T8218900',
 'T8219900',
 'T8221500')
+
+names(new_data_mothers) <- qcodes
 
 # Handle missing values
 new_data_mothers[new_data_mothers == -1] = NA  # Refused
@@ -4871,33 +4873,233 @@ mothers_data_labelled <- new_data_mothers %>%
   left_join(mother_ids, by = 'MOTHER_ID') %>% 
   filter(children > 0)
 
-mothers_data_pivot <- mothers_data_labelled %>% 
-  pivot_longer(-c('MOTHER_ID', 'children','SEX OF R 1979' ),
-               names_to = 'variable') %>% 
+
+##########################################
+# ENCODING
+
+encoding_df <- data.frame(qnames=question_names_mothers,
+                          qlabel=varlabels_mothers,
+                          qcodes=qcodes)
+
+
+
+# (i) religion raised 1979
+mothers_data_labelled$`IN WHAT RELIGION WAS R RAISED? 1979` <- factor(
+  mothers_data_labelled$`IN WHAT RELIGION WAS R RAISED? 1979`,
+  levels=c(0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0),
+  labels=c("NONE, NO RELIGION",
+           "PROTESTANT",
+           "BAPTIST",
+           "EPISCOPALIAN",
+           "LUTHERAN",
+           "METHODIST",
+           "PRESBYTERIAN",
+           "ROMAN CATHOLIC",
+           "JEWISH",
+           "OTHER"))
+
+# (ii) religion raised 2000
+mothers_data_labelled$`IN WHAT RELIGION WAS R RAISED? 2000` <- factor(
+  mothers_data_labelled$`IN WHAT RELIGION WAS R RAISED? 2000`,
+  levels=c(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0),
+  labels=c("PROTESTANT, CHRISTIAN, NO DENOMINATION KNOWN OR NON-DENOMINATIONAL CHURCH",
+           "BAPTIST",
+           "ESPISCOPALIAN",
+           "LUTHERAN",
+           "METHODIST",
+           "PRESBYTERIAN",
+           "ROMAN CATHOLIC",
+           "JEWISH",
+           "OTHER (SPECIFY)",
+           "NONE, NO RELIGION"))
+
+# (iii) religious affiliation 1979
+mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 1979` <- factor(
+  mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 1979`,
+  levels=c(0, 1, 2, 3, 4, 5, 6, 7, 8, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 300, 301),
+  labels=c('NONE', 'PROTESTANT, ETC.', 'BAPTIST', 'EPISCOPALIAN', 'LUTHERAN', 'METHODIST', 'PRESBYTERIAN', 'ROMAN CATHOLIC', 'JEWISH', 'ARMENIAN CHURCH', "BAHA'I", 'BUDDHIST', 'CONFUCIAN', 'EASTERN ORTHODOX', 'GREEK ORTHODOX', 'HINDU', 'MOSLEM', 'MUSLIM', 'RUSSIAN ORTHODOX', 'SHINTO', 'SIKH', 'TAOIST', 'ADVENT CHRISTIAN', 'AFRICAN METHODIST', 'AFRICAN METHODIST EPISCOPAL', 'AFRICAN METHODIST EPISCOPAL-ZION', 'APOSTOLIC', 'APOSTOLIC FAITH', 'APOSTOLIC PENTECOSTAL', 'ASSEMBLY OF GOD', 'BIBLE CHURCH, INDEPENDENT', 'BRETHREN CHURCH', 'CHRISTADELPHIAN', 'CHRIST IN CHRISTIAN UNION', 'CHRISTIAN, DISCIPLES OF CHRIST', 'CHRISTIAN AND MISSIONARY ALLIANCE', 'CHRISTIAN CATHOLIC', 'CHRISTIAN METHODIST-EPISCOPAL', 'CHRISTIAN REFORMED', 'CHRISTIAN SCIENCE', 'CHURCH OF CHRIST', 'CHURCH OF GOD', 'CHURCH OF GOD IN CHRIST', 'CHURCH OF THE LIVING GOD', 'CONGREGATIONAL', 'CONSERVATIVE BAPTIST', 'EVANGELICAL', 'EVANGELICAL REFORMED', 'EVANGELICAL CONGREGATIONAL', 'EVANGELICAL MISSION COVENANT', 'EVANGELICAL FRIENDS', 'EVANGELICAL UNITED BRETHREN', 'FOURSQUARE GOSPEL', 'FREE CHRISTIAN ZION', 'FREE WILL BAPTIST', 'FRIENDS, QUAKER', 'FULL GOSPEL', 'FUNDAMENTAL', 'CHURCH OF HOLINESS', "JEHOVAH'S WITNESS", 'LATTER DAY SAINTS, MORMON', 'LATTER DAY SAINTS REORGANIZED', 'MENNONITE', 'MENNONITE REFORMED', 'MISSIONARY', 'MORAVIAN', 'NAZARENE', 'NEW APOSTOLIC', 'NORTHERN BAPTIST', 'OPEN BIBLE', 'PENTECOSTAL', 'PENTECOSTAL ASSEMBLY OF GOD', 'PENTECOSTAL CHURCH OF GOD', 'PENTECOSTAL FREE WILL BAPTIST', 'PENTECOSTAL HOLINESS', 'PILGRIM HOLINESS', 'PLYMOUTH BRETHREN', 'PRIMITIVE BAPTIST', 'DUTCH REFORMED', 'REFORMED CHURCH OF CHRIST', 'REFORMED UNITED CHURCH OF CHRIST', 'SALVATION ARMY', 'SEVENTH DAY ADVENTIST', 'SOUTHERN BAPTIST', 'SPIRITUALIST', 'SWEDISH MISSION', 'TRIUMPH THE CHURCH OF THE KINGDOM', 'UNITARIAN UNIVERSALIST', 'UNITED BRETHREN IN CHRIST', 'UNITED CHURCH OF CHRIST', 'UNITED HOLINESS', 'WESLEYAN', 'WESLEYAN METHODIST', 'WITNESS HOLINESS', 'ZION UNION', 'ZION UNION APOSTOLIC', 'ZION UNION APOSTOLIC REFORMED', 'OTHER PROTESTANT', 'OTHER NON-CHRISTIAN')) 
+
+
+# (iv) religious affiliation 1982
+mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 1982` <- factor(
+  mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 1982`,
+  levels=c(1.0,2.0,3.0,4.0,5.0),
+  labels=c("PROTESTANT",
+           "ROMAN CATHOLIC",
+           "JEWISH",
+           "NONE",
+           "OTHER")) 
+
+
+# (v) religious affiliation 2000
+mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 2000` <- factor(
+  mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 2000`,
+  levels=c(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0),
+  labels=c("PROTESTANT, CHRISTIAN, NO DENOMINATION KNOWN OR NON-DENOMINATIONAL CHURCH",
+           "BAPTIST",
+           "ESPISCOPALIAN",
+           "LUTHERAN",
+           "METHODIST",
+           "PRESBYTERIAN",
+           "ROMAN CATHOLIC",
+           "JEWISH",
+           "OTHER (SPECIFY)",
+           "NONE, NO RELIGION"))
+
+
+# (vi) religious affiliation 2012
+mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 2012` <- factor(
+  mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 2012`,
+  levels=c(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0),
+  labels=c("PROTESTANT",
+           "BAPTIST",
+           "ESPISCOPALIAN",
+           "LUTHERAN",
+           "METHODIST",
+           "PRESBYTERIAN",
+           "ROMAN CATHOLIC",
+           "JEWISH",
+           "OTHER (SPECIFY)",
+           "NONE, NO RELIGION",
+           "CHRISTIAN, NO DENOMINATION GIVEN",
+           "NON-DENOMINATIONAL OR NO DENOMINATION KNOWN"))
+
+# (vii) religious affiliation 2014
+mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 2014` <- factor(
+  mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 2014`,
+  levels=c(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0),
+  labels=c("PROTESTANT",
+           "BAPTIST",
+           "EPISCOPALIAN",
+           "LUTHERAN",
+           "METHODIST",
+           "PRESBYTERIAN",
+           "ROMAN CATHOLIC",
+           "JEWISH",
+           "OTHER (SPECIFY)",
+           "NONE, NO RELIGION",
+           "CHRISTIAN, NO DENOMINATION GIVEN",
+           "NON-DENOMINATIONAL OR NO DENOMINATION KNOWN"))
+
+
+# (viii) religious affiliation 2016
+mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 2016` <- factor(
+  mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 2016`,
+  levels=c(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0),
+  labels=c("PROTESTANT",
+           "BAPTIST",
+           "EPISCOPALIAN, ANGLICAN/CHURCH OF ENGLAND",
+           "LUTHERAN",
+           "METHODIST",
+           "PRESBYTERIAN",
+           "CATHOLIC/ROMAN CATHOLIC",
+           "JEWISH",
+           "OTHER (SPECIFY)",
+           "NONE, NO RELIGION",
+           "NON-DENOMINATIONAL OR NO DENOMINATION KNOWN",
+           "ORTHODOX CHRISTIAN (GREEK, RUSSIAN, ETC)",
+           "PENTECOSTAL/EVANGELICAL",
+           "JEHOVAH’S WITNESS",
+           "MORMON/LDS",
+           "CHURCH OF CHRIST",
+           "UNITED CHURCH OF CHRIST",
+           "AME (AFRICAN METHODIST EPISCOPAL)/AME ZION",
+           "ASSEMBLY OF GOD",
+           "HOLINESS",
+           "APOSTOLIC",
+           "7TH DAY ADVENTIST",
+           "CHRISTIAN, OTHER (SPECIFY)",
+           "UNITARIAN/UNITARIAN UNIVERSALIST",
+           "MUSLIM, MOSLEM",
+           "BUDDHIST",
+           "HINDU"))
+
+# (ix) religious affiliation 2018
+mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 2018` <- factor(
+  mothers_data_labelled$`PRESENT RELIGIOUS AFFILIATION 2018`,
+  levels=c(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0,26.0,27.0,28.0,29.0),
+  labels=c("PROTESTANT",
+           "BAPTIST",
+           "EPISCOPALIAN, ANGLICAN/CHURCH OF ENGLAND",
+           "LUTHERAN",
+           "METHODIST",
+           "PRESBYTERIAN",
+           "CATHOLIC/ROMAN CATHOLIC",
+           "JEWISH",
+           "OTHER (SPECIFY)",
+           "NONE, NO RELIGION",
+           "NON-DENOMINATIONAL OR NO DENOMINATION KNOWN",
+           "ORTHODOX CHRISTIAN (GREEK, RUSSIAN, ETC)",
+           "PENTECOSTAL/EVANGELICAL",
+           "JEHOVAH’S WITNESS",
+           "MORMON/LDS",
+           "CHURCH OF CHRIST",
+           "UNITED CHURCH OF CHRIST",
+           "AME (AFRICAN METHODIST EPISCOPAL)/AME ZION",
+           "ASSEMBLY OF GOD",
+           "HOLINESS",
+           "APOSTOLIC",
+           "7TH DAY ADVENTIST",
+           "CHRISTIAN, OTHER (SPECIFY)",
+           "UNITARIAN/UNITARIAN UNIVERSALIST",
+           "MUSLIM, MOSLEM",
+           "BUDDHIST",
+           "HINDU",
+           "Wakan Tanka- Native American and First nations"))
+
+
+
+
+##########################################
+
+religion_id_cols = c('IN WHAT RELIGION WAS R RAISED? 1979',
+                     'IN WHAT RELIGION WAS R RAISED? 2000',
+                     'PRESENT RELIGIOUS AFFILIATION 1979',
+                     'PRESENT RELIGIOUS AFFILIATION 1982',
+                     'PRESENT RELIGIOUS AFFILIATION 2000',
+                     'PRESENT RELIGIOUS AFFILIATION 2012',
+                     'PRESENT RELIGIOUS AFFILIATION 2014',
+                     'PRESENT RELIGIOUS AFFILIATION 2016',
+                     'PRESENT RELIGIOUS AFFILIATION 2018')
+
+mothers_data_pivot <- mothers_data_labelled %>%
+  select(-religion_id_cols) %>%
+  pivot_longer(-c('MOTHER_ID', 'children', 'SEX OF R 1979'),
+               names_to = 'variable') %>%
   mutate(question = str_sub(variable,1,-5),
          year = as.integer(str_sub(variable,-4,-1)))
 
-# tabulate the years when each question is asked
-questions <- mothers_data_pivot %>% 
-  select('question','year') %>% 
-  group_by(question, year) %>% 
-  summarise(count =n()) %>% 
-  select('question','year') %>% 
-  mutate(count = 1) %>% 
-  pivot_wider(names_from = 'year', values_from = 'count') %>% 
-  select(-`8197`) %>% 
-  replace(is.na(.), 0) %>% 
-  mutate(years_asked = rowSums(across(where(is.numeric))))
 
-# tally the percentage of NA values by year and question
-questions_NAs <- mothers_data_pivot %>% 
-  select('question','year', 'value', 'MOTHER_ID') %>% 
-  filter(is.na(value)) %>% 
-  group_by(question, year) %>% 
-  summarise(count =(n()/49.41)) %>% 
-  pivot_wider(names_from = 'year', values_from = 'count')%>% 
-  select(-`8197`) %>% 
-  replace(is.na(.), 0)
 
-#############################################################
+mothers_data_pivot_rel <- mothers_data_labelled %>%
+  select(c(religion_id_cols, 'MOTHER_ID', 'children', 'SEX OF R 1979')) %>%
+  pivot_longer(-c('MOTHER_ID', 'children', 'SEX OF R 1979'),
+               names_to = 'variable') %>%
+  mutate(question = str_sub(variable,1,-5),
+         year = as.integer(str_sub(variable,-4,-1)))
+
+# # tabulate the years when each question is asked
+# questions <- mothers_data_pivot %>% 
+#   select('question','year') %>% 
+#   group_by(question, year) %>% 
+#   summarise(count =n()) %>% 
+#   select('question','year') %>% 
+#   mutate(count = 1) %>% 
+#   pivot_wider(names_from = 'year', values_from = 'count') %>% 
+#   select(-`8197`) %>% 
+#   replace(is.na(.), 0) %>% 
+#   mutate(years_asked = rowSums(across(where(is.numeric))))
+# 
+# # tally the percentage of NA values by year and question
+# questions_NAs <- mothers_data_pivot %>% 
+#   select('question','year', 'value', 'MOTHER_ID') %>% 
+#   filter(is.na(value)) %>% 
+#   group_by(question, year) %>% 
+#   summarise(count =(n()/49.41)) %>% 
+#   pivot_wider(names_from = 'year', values_from = 'count')%>% 
+#   select(-`8197`) %>% 
+#   replace(is.na(.), 0)
+# 
+# #############################################################
 save(mothers_data_pivot, file = "./data/mothers_data_pivot.RData")
+save(mothers_data_pivot_rel, file = "./data/mothers_data_pivot_rel.RData")
