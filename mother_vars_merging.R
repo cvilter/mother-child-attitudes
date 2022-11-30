@@ -5,6 +5,7 @@ library(stringr)
 library(dplyr)
 library(tidyr)
 
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 load("./data/intermediate2.RData")
 load("./data/mothers_data_pivot.RData")
