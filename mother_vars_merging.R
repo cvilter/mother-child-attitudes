@@ -286,7 +286,7 @@ all_data <- all_data[, c(1,2,3,ncol(all_data),4:(ncol(all_data)-1))]
 all_data <- na.omit(all_data)
 
 # One-hot encode
-all_data <- fastDummies::dummy_cols(all_data, remove_selected_columns=TRUE)
+all_data <- fastDummies::dummy_cols(all_data, remove_selected_columns=TRUE, remove_first_dummy = TRUE)
 
 
 # Create a version where feature vars are standardized
