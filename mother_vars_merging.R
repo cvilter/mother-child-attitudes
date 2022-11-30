@@ -288,6 +288,9 @@ all_data <- na.omit(all_data)
 # One-hot encode
 all_data <- fastDummies::dummy_cols(all_data, remove_selected_columns=TRUE, remove_first_dummy = TRUE)
 
+# remove the all-zero columns
+all_data <- all_data %>% select_if(colSums(.) != 0)
+
 
 # Create a version where feature vars are standardized
 # Needs debugging; creating NAs
