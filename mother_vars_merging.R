@@ -279,12 +279,11 @@ all_data <- all_data[, c(1,2,3,ncol(all_data),4:(ncol(all_data)-1))]
 all_data <- na.omit(all_data)
 
 # One-hot encode
-# Uncomment once categorical variables are converted to factors:
-#all_data <- fastDummies::dummy_cols(all_data)
+all_data <- fastDummies::dummy_cols(all_data, remove_selected_columns=TRUE)
 
 
 # Create a version where feature vars are standardized
-# Incomplete
+# Needs debugging; creating NAs
 #all_data_standardized <- all_data %>% 
 #  mutate_at(vars(-c('child_id', 'mother_id', 'treat_alike_scale', 'treat_alike_binary')), ~(scale(.) %>% as.vector))
 
@@ -293,7 +292,4 @@ all_data <- na.omit(all_data)
 # Keep only all_data in environment
 rm(list=setdiff(ls(), c("all_data", "all_data_standardized")))
 
-
 write.csv(all_data, file="./data/all_data.csv", row.names=FALSE)
-
-
