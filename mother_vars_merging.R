@@ -265,4 +265,30 @@ citizen <-  mothers_data_pivot %>%
   rename(is_citizen = value)
 
 
-write.csv(all_data, file="./data/all_data.csv")
+
+# Final cleaning steps
+
+# Rename and recode Y
+all_data <- rename(all_data, treat_alike_scale = BOYS.GIRLS.SHOULD.BE.TREATED.ALIKE.)
+all_data$treat_alike_binary <- recode(all_data$treat_alike_scale, `1` = 1, `2` = 1, `3` = -1, `4` = -1)
+all_data <- all_data[, c(1,2,3,ncol(all_data),4:(ncol(all_data)-1))]
+
+# Drop NAs
+all_data <- na.omit(all_data)
+
+# One-hot encode
+# Uncomment once categorical variables are converted to factors:
+#all_data <- fastDummies::dummy_cols(all_data)
+
+
+# Create a version where feature vars are standardized
+# Incomplete
+#all_data_standardized <- all_data %>% 
+#  mutate_at(vars(-c('child_id', 'mother_id', 'treat_alike_scale', 'treat_alike_binary')), ~(scale(.) %>% as.vector))
+
+
+
+# Keep only all_data in environment
+rm(list=setdiff(ls(), c("all_data", "all_data_standardized")))
+
+write.csv(all_data, file="./data/all_data.csv", row.names=FALSE)

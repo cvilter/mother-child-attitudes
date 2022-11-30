@@ -5,6 +5,8 @@ library(stringr)
 library(dplyr)
 library(tidyr)
 
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
 new_data <- read.table('./data/child_y_vars.dat', sep=' ')
 names(new_data) <- c('C0000100',
 'C0000200',
