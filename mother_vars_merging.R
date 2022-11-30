@@ -248,6 +248,12 @@ race_eth <- mothers_data_pivot %>%
             select(MOTHER_ID, value) %>%
             rename(mother_race = value)
 
+race_eth$mother_race <- factor(race_eth$mother_race,
+                        levels=c(1.0,2.0,3.0),
+                        labels=c("HISPANIC",
+                                 "BLACK",
+                                 "NON-BLACK, NON-HISPANIC"))
+
 all_data <- left_join(all_data, 
                       race_eth,
                       by = c("mother_id" = "MOTHER_ID"))
