@@ -338,9 +338,13 @@ all_data = all_data[,!grepl("mother_religion_raised",names(all_data))]
 all_data = all_data[,!grepl("mother_religion_current",names(all_data))]
 
 # Create a version where feature vars are standardized
-all_data_standardized <- all_data %>%
-  mutate_at(vars(-c('child_id', 'mother_id', 'treat_alike_scale', 'treat_alike_binary')), ~(scale(.) %>% as.vector))
 
+normalize <- function(x, na.rm = TRUE) {
+  return((x- min(x)) /(max(x)-min(x)))
+}
+
+all_data_standardized <- all_data %>%
+  mutate_at(tail(names(all_data),-4), normalize)
 
 
 # Keep only all_data in environment
