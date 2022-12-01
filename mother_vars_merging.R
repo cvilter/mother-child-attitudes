@@ -291,11 +291,9 @@ all_data <- fastDummies::dummy_cols(all_data, remove_selected_columns=TRUE, remo
 # remove the all-zero columns
 all_data <- all_data %>% select_if(colSums(.) != 0)
 
-
 # Create a version where feature vars are standardized
-# Needs debugging; creating NAs
-#all_data_standardized <- all_data %>% 
-#  mutate_at(vars(-c('child_id', 'mother_id', 'treat_alike_scale', 'treat_alike_binary')), ~(scale(.) %>% as.vector))
+all_data_standardized <- all_data %>%
+  mutate_at(vars(-c('child_id', 'mother_id', 'treat_alike_scale', 'treat_alike_binary')), ~(scale(.) %>% as.vector))
 
 
 
@@ -303,3 +301,4 @@ all_data <- all_data %>% select_if(colSums(.) != 0)
 rm(list=setdiff(ls(), c("all_data", "all_data_standardized")))
 
 write.csv(all_data, file="./data/all_data.csv", row.names=FALSE)
+write.csv(all_data, file="./data/all_data_standardized.csv", row.names=FALSE)
