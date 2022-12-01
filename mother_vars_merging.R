@@ -351,4 +351,4 @@ all_data_standardized <- all_data %>%
 rm(list=setdiff(ls(), c("all_data", "all_data_standardized")))
 
 write.csv(all_data, file="./data/all_data.csv", row.names=FALSE)
-write.csv(all_data, file="./data/all_data_standardized.csv", row.names=FALSE)
+write.csv(all_data_standardized, file="./data/all_data_standardized.csv", row.names=FALSE)
