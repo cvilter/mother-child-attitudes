@@ -331,7 +331,7 @@ all_data$mother_relig_current_other <- ifelse(
      all_data$mother_religion_current_OTHER == 1 |
      all_data$`mother_religion_current_OTHER (SPECIFY)` == 1 |
      all_data$`mother_religion_current_FRIENDS, QUAKER` == 1 |
-     all_data$`mother_religion_current_NON-DENOMINATIONAL OR NO DENOMINATION KNOWN` == 1, 
+     all_data$`mother_religion_current_NON-DENOMINATIONAL OR NO DENOMINATION KNOWN` == 1), 
   1, 0)
 # Drop old versions
 all_data = all_data[,!grepl("mother_religion_raised",names(all_data))]
