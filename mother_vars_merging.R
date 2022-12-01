@@ -291,6 +291,52 @@ all_data <- fastDummies::dummy_cols(all_data, remove_selected_columns=TRUE, remo
 # remove the all-zero columns
 all_data <- all_data %>% select_if(colSums(.) != 0)
 
+# Aggregate the religion dummies
+# Raised religion
+all_data$mother_relig_raised_protestant <- ifelse(
+  (all_data$mother_religion_raised_PROTESTANT == 1 |
+     all_data$mother_religion_raised_BAPTIST == 1 |
+     all_data$mother_religion_raised_EPISCOPALIAN == 1 |
+     all_data$mother_religion_raised_LUTHERAN == 1 |
+     all_data$mother_religion_raised_METHODIST == 1 |
+     all_data$mother_religion_raised_PRESBYTERIAN == 1 |
+     all_data$`mother_religion_raised_PROTESTANT, CHRISTIAN, NO DENOMINATION KNOWN OR NON-DENOMINATIONAL CHURCH`== 1), 
+  1, 0)
+all_data$mother_relig_raised_catholic <- ifelse(
+  (all_data$`mother_religion_raised_ROMAN CATHOLIC` == 1), 
+  1, 0)
+all_data$mother_relig_raised_other <- ifelse(
+  (all_data$mother_religion_raised_JEWISH == 1 |
+     all_data$mother_religion_raised_OTHER == 1 |
+     all_data$`mother_religion_raised_OTHER (SPECIFY)` == 1), 
+  1, 0)
+# Current religion
+all_data$mother_relig_current_protestant <- ifelse(
+  (all_data$mother_religion_current_PROTESTANT == 1 |
+     all_data$mother_religion_current_BAPTIST == 1 |
+     all_data$mother_religion_current_LUTHERAN == 1 |
+     all_data$mother_religion_current_METHODIST == 1 |
+     all_data$mother_religion_current_PRESBYTERIAN == 1 |
+     all_data$`mother_religion_current_PROTESTANT, CHRISTIAN, NO DENOMINATION KNOWN OR NON-DENOMINATIONAL CHURCH` == 1 |
+     all_data$mother_religion_current_ESPISCOPALIAN== 1 |
+     all_data$`mother_religion_current_PROTESTANT, ETC.` == 1 |
+     all_data$mother_religion_current_PENTECOSTAL == 1 |
+     all_data$`mother_religion_current_CHRISTIAN, NO DENOMINATION GIVEN` == 1), 
+  1, 0)
+all_data$mother_relig_current_catholic <- ifelse(
+  (all_data$`mother_religion_current_ROMAN CATHOLIC` == 1), 
+  1, 0)
+all_data$mother_relig_current_other <- ifelse(
+  (all_data$mother_religion_current_JEWISH == 1 |
+     all_data$mother_religion_current_OTHER == 1 |
+     all_data$`mother_religion_current_OTHER (SPECIFY)` == 1 |
+     all_data$`mother_religion_current_FRIENDS, QUAKER` == 1 |
+     all_data$`mother_religion_current_NON-DENOMINATIONAL OR NO DENOMINATION KNOWN` == 1, 
+  1, 0)
+# Drop old versions
+all_data = all_data[,!grepl("mother_religion_raised",names(all_data))]
+all_data = all_data[,!grepl("mother_religion_current",names(all_data))]
+
 # Create a version where feature vars are standardized
 all_data_standardized <- all_data %>%
   mutate_at(vars(-c('child_id', 'mother_id', 'treat_alike_scale', 'treat_alike_binary')), ~(scale(.) %>% as.vector))
